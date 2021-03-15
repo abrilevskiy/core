@@ -9,7 +9,6 @@ from miio import (
     AirHumidifier,
     AirHumidifierMiot,
     AirPurifier,
-    AirPurifierMB4,
     AirPurifierMiot,
     DeviceException,
 )
@@ -64,7 +63,6 @@ from .const import (
     MODEL_AIRHUMIDIFIER_CB1,
     MODEL_AIRPURIFIER_2S,
     MODEL_AIRPURIFIER_3,
-    MODEL_AIRPURIFIER_3C,
     MODEL_AIRPURIFIER_3H,
     MODEL_AIRPURIFIER_PRO,
     MODEL_AIRPURIFIER_PRO_V7,
@@ -253,18 +251,6 @@ AVAILABLE_ATTRIBUTES_AIRPURIFIER_3 = {
     ATTR_FAN_LEVEL: "fan_level",
 }
 
-AVAILABLE_ATTRIBUTES_AIRPURIFIER_3C = {
-    ATTR_AIR_QUALITY_INDEX: "aqi",
-    ATTR_MODE: "mode",
-    ATTR_FILTER_HOURS_USED: "filter_hours_used",
-    ATTR_FILTER_LIFE: "filter_life_remaining",
-    ATTR_FAVORITE_LEVEL: "favorite_rpm",
-    ATTR_CHILD_LOCK: "child_lock",
-    ATTR_MOTOR_SPEED: "motor_speed",
-    ATTR_BUZZER: "buzzer",
-    ATTR_LED_BRIGHTNESS: "led_brightness_level",
-}
-
 AVAILABLE_ATTRIBUTES_AIRPURIFIER_V3 = {
     # Common set isn't used here. It's a very basic version of the device.
     ATTR_AIR_QUALITY_INDEX: "aqi",
@@ -360,7 +346,6 @@ OPERATION_MODES_AIRPURIFIER_V3 = [
     "High",
     "Strong",
 ]
-OPERATION_MODES_AIRPURIFIER_3C = ["Auto", "Silent", "Favorite"]
 OPERATION_MODES_AIRFRESH = ["Auto", "Silent", "Interval", "Low", "Middle", "Strong"]
 
 SUCCESS = ["ok"]
@@ -414,15 +399,6 @@ FEATURE_FLAGS_AIRPURIFIER_2S = (
 )
 
 FEATURE_FLAGS_AIRPURIFIER_3 = (
-    FEATURE_SET_BUZZER
-    | FEATURE_SET_CHILD_LOCK
-    | FEATURE_SET_LED
-    | FEATURE_SET_FAVORITE_LEVEL
-    | FEATURE_SET_FAN_LEVEL
-    | FEATURE_SET_LED_BRIGHTNESS
-)
-
-FEATURE_FLAGS_AIRPURIFIER_3C = (
     FEATURE_SET_BUZZER
     | FEATURE_SET_CHILD_LOCK
     | FEATURE_SET_LED
@@ -574,10 +550,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
         _LOGGER.debug("Initializing with host %s (token %s...)", host, token[:5])
 
-        if model == MODEL_AIRPURIFIER_3C:
-            air_purifier = AirPurifierMB4(host, token)
-            entity = XiaomiAirPurifierMiot(name, air_purifier, config_entry, unique_id)
-        elif model in MODELS_PURIFIER_MIOT:
+        if model in MODELS_PURIFIER_MIOT:
             air_purifier = AirPurifierMiot(host, token)
             entity = XiaomiAirPurifierMiot(name, air_purifier, config_entry, unique_id)
         elif model.startswith("zhimi.airpurifier."):
@@ -821,10 +794,6 @@ class XiaomiAirPurifier(XiaomiGenericDevice):
             self._device_features = FEATURE_FLAGS_AIRPURIFIER_V3
             self._available_attributes = AVAILABLE_ATTRIBUTES_AIRPURIFIER_V3
             self._speed_list = OPERATION_MODES_AIRPURIFIER_V3
-        elif self._model == MODEL_AIRPURIFIER_3C:
-            self._device_features = FEATURE_FLAGS_AIRPURIFIER_3C
-            self._available_attributes = AVAILABLE_ATTRIBUTES_AIRPURIFIER_3C
-            self._speed_list = OPERATION_MODES_AIRPURIFIER_3C
         else:
             self._device_features = FEATURE_FLAGS_AIRPURIFIER
             self._available_attributes = AVAILABLE_ATTRIBUTES_AIRPURIFIER
